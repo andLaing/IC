@@ -7,7 +7,8 @@ from pytest import fixture
 from pytest import mark
 from flaky  import flaky
 
-from . import blr
+from .. reco import calib_sensors_functions as csf
+from .       import blr
 
 
 deconv_params = namedtuple("deconv_params",
@@ -59,14 +60,18 @@ def test_deconvolve_signal_positive_integral(sin_wf, sin_wf_params):
     # the same number of positive and negative samples.
     # The CWF on the other hand should contain mostly positive
     # samples, therefore the integral should be positive.
-    blr_wf = blr.deconvolve_signal(sin_wf, **sin_wf_params._asdict())
+    n_baseline = 28000
+    sin_wf_noped = np.mean(sin_wf[:n_baseline]) - sin_wf
+    blr_wf = blr.deconvolve_signal(sin_wf_noped, **sin_wf_params._asdict())
     assert np.sum(blr_wf > 0)
 
 
 def test_deconvolve_signal_baseline_is_recovered(sin_wf, sin_wf_params):
     # The RWF contains a baseline. The deconvolution process should
     # remove it. We take the baseline as the most repeated value.
-    blr_wf      = blr.deconvolve_signal(sin_wf, **sin_wf_params._asdict())
+    n_baseline = 28000
+    sin_wf_noped = np.mean(sin_wf[:n_baseline]) - sin_wf
+    blr_wf      = blr.deconvolve_signal(sin_wf_noped, **sin_wf_params._asdict())
     (entries,
      amplitude) = np.histogram(blr_wf, 200)
     baseline    = amplitude[np.argmax(entries)]
@@ -86,7 +91,9 @@ def test_deconvolve_signal_ad_hoc_signals(ad_hoc_blr_signals):
 
     rwf         = all_rwfs        [evt_no, pmt_no]
     true_blr_wf = all_true_blr_wfs[evt_no, pmt_no]
-    blr_wf = blr.deconvolve_signal(rwf.astype(np.double),
+    
+    cwf         = np.mean(rwf[:params.n_baseline]) - rwf
+    blr_wf = blr.deconvolve_signal(cwf,
                                    n_baseline             = params.n_baseline,
                                    coeff_clean            = params.coeff_clean[pmt_no],
                                    coeff_blr              = params.coeff_blr  [pmt_no],
@@ -106,13 +113,15 @@ def test_deconv_pmt_ad_hoc_signals_all(ad_hoc_blr_signals):
     evt_rwfs         = all_rwfs        [evt_no]
     evt_true_blr_wfs = all_true_blr_wfs[evt_no]
 
-    blr_wfs = blr.deconv_pmt(evt_rwfs,
-                             params.coeff_clean,
-                             params.coeff_blr  ,
-                             pmt_active,
-                             params.n_baseline ,
-                             params.thr_trigger,
-                             params.accum_discharge_length)
+    evt_cwfs   = csf.means(evt_rwfs[:, :params.n_baseline]) - evt_rwfs
+
+    blr_wfs    = blr.deconv_pmt(evt_cwfs,
+                                params.coeff_clean,
+                                params.coeff_blr  ,
+                                pmt_active        ,
+                                params.n_baseline ,
+                                params.thr_trigger,
+                                params.accum_discharge_length)
 
     np.allclose(blr_wfs, evt_true_blr_wfs)
 
@@ -132,7 +141,9 @@ def test_deconv_pmt_ad_hoc_signals_dead_sensors(ad_hoc_blr_signals):
     evt_rwfs         = all_rwfs        [evt_no]
     evt_true_blr_wfs = all_true_blr_wfs[evt_no]
 
-    blr_wfs = blr.deconv_pmt(evt_rwfs,
+    evt_cwfs   = csf.means(evt_rwfs[:, :params.n_baseline]) - evt_rwfs
+
+    blr_wfs = blr.deconv_pmt(evt_cwfs,
                              params.coeff_clean,
                              params.coeff_blr  ,
                              pmt_active.tolist(),

@@ -11,6 +11,7 @@ from .. database             import load_db
 from .                   import wfm_functions as wfm
 from .  sensor_functions import convert_channel_id_to_IC_id
 from .  sensor_functions import simulate_pmt_response
+from .. reco             import calib_sensors_functions as csf
 
 
 def test_cwf_blr(dbnew, electron_MCRD_file):
@@ -29,8 +30,8 @@ def test_cwf_blr(dbnew, electron_MCRD_file):
         pmtrd = h5in.root.pmtrd
         dataPMT, BLR = simulate_pmt_response(event, pmtrd, adc_to_pes, single_pe_rms)
         RWF = dataPMT.astype(np.int16)
-
-        CWF = blr.deconv_pmt(RWF,
+        RWF_noped = csf.means(RWF[:, :28000]) - RWF
+        CWF = blr.deconv_pmt(RWF_noped,
                              coeff_c,
                              coeff_blr,
                              pmt_active,
