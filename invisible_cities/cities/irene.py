@@ -19,6 +19,7 @@ This includes a number of tasks:
 import tables as tb
 
 from .. reco                  import tbl_functions        as tbl
+from .. reco                  import calib_sensors_functions as csf
 from .. core.random_sampling  import NoiseSampler         as SiPMsNoiseSampler
 from .. core                  import system_of_units      as units
 from .. io  .run_and_event_io import run_and_event_writer
@@ -42,7 +43,6 @@ from .  components import wf_from_files
 from .  components import get_number_of_active_pmts
 from .  components import compute_and_write_pmaps
 
-
 @city
 def irene(files_in, file_out, compression, event_range, print_mod, detector_db, run_number,
           n_baseline, n_mau, thr_mau, thr_sipm, thr_sipm_type,
@@ -65,7 +65,7 @@ def irene(files_in, file_out, compression, event_range, print_mod, detector_db, 
     #### Define data transformations
 
     # Raw WaveForm to Corrected WaveForm
-    rwf_to_cwf       = fl.map(deconv_pmt(detector_db, run_number, n_baseline),
+    rwf_to_cwf       = fl.map(deconv_pmt(detector_db, run_number, n_baseline, pedestal_function=csf.medians),
                               args = "pmt",
                               out  = "cwf")
 
