@@ -22,7 +22,7 @@ cpdef deconvolve_signal(double [:] signal_daq,
     """
 
     cdef double coef = coeff_blr
-    cdef int nm = n_baseline
+    ##cdef int nm = n_baseline
     cdef double thr_acum = thr_trigger / coef
     cdef int len_signal_daq = len(signal_daq)
 
@@ -30,15 +30,15 @@ cpdef deconvolve_signal(double [:] signal_daq,
     cdef double [:] acum     = np.zeros(len_signal_daq, dtype=np.double)
 
     cdef int j
-    cdef double baseline = 0
+    ##cdef double baseline = 0
 
-    for j in range(0,nm):
-        baseline += signal_daq[j]
-    baseline /= nm
+    ##for j in range(0,nm):
+    ##    baseline += signal_daq[j]
+    ##baseline /= nm
 
     # reverse sign of signal and subtract baseline
-    for j in range(0,len_signal_daq):
-        signal_daq[j] = baseline - signal_daq[j]
+    ##for j in range(0,len_signal_daq):
+    ##    signal_daq[j] = baseline - signal_daq[j]
 
     # compute noise
     cdef double noise =  0
@@ -86,7 +86,7 @@ cpdef deconvolve_signal(double [:] signal_daq,
     return np.asarray(signal_r)
 
 
-cpdef deconv_pmt(np.ndarray[np.int16_t, ndim=2] pmtrwf,
+cpdef deconv_pmt(np.ndarray[double, ndim=2] pmtrwf,
                  double [:]                     coeff_c,
                  double [:]                     coeff_blr,
                  list                           pmt_active             =    [],
@@ -95,7 +95,7 @@ cpdef deconv_pmt(np.ndarray[np.int16_t, ndim=2] pmtrwf,
                  int                            accum_discharge_length =  5000):
     """
     Deconvolve all the PMTs in the event.
-    :param pmtrwf: array of PMTs holding the raw waveform
+    :param pmtrwf: array of PMTs holding the pedestal subtracted waveform
     :param coeff_c:     cleaning coefficient
     :param coeff_blr:   deconvolution coefficient
     :param pmt_active:  list of active PMTs (by id number). An empt list
