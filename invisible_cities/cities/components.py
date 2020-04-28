@@ -218,8 +218,7 @@ def deconv_pmt(dbfile, run_number, n_baseline,
         return blr.deconv_pmt(CWF,
                               coeff_c,
                               coeff_blr,
-                              pmt_active = pmt_active,
-                              n_baseline = n_baseline)
+                              pmt_active = pmt_active)
     return deconv_pmt
 
 
