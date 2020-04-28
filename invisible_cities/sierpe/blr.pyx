@@ -3,7 +3,6 @@ cimport numpy as np
 from scipy import signal as SGN
 
 cpdef deconvolve_signal(double [:] signal_daq,
-                        int    n_baseline             = 28000,
                         double coeff_clean            = 2.905447E-06,
                         double coeff_blr              = 1.632411E-03,
                         double thr_trigger            =     5,
@@ -17,12 +16,9 @@ cpdef deconvolve_signal(double [:] signal_daq,
     In this version the recovered signal and the accumulator are
     always being charged. At the same time, the accumulator is being
     discharged when there is no signal. This avoids runoffs
-    The baseline is computed using a window of 700 mus (by default)
-    which should be good for Na and Kr
     """
 
     cdef double coef = coeff_blr
-    ##cdef int nm = n_baseline
     cdef double thr_acum = thr_trigger / coef
     cdef int len_signal_daq = len(signal_daq)
 
@@ -81,7 +77,6 @@ cpdef deconv_pmt(np.ndarray[double, ndim=2] pmtrwf,
                  double [:]                 coeff_c,
                  double [:]                 coeff_blr,
                  list                       pmt_active             =    [],
-                 int                        n_baseline             = 28000,
                  double                     thr_trigger            =     5,
                  int                        accum_discharge_length =  5000):
     """
@@ -91,7 +86,6 @@ cpdef deconv_pmt(np.ndarray[double, ndim=2] pmtrwf,
     :param coeff_blr:   deconvolution coefficient
     :param pmt_active:  list of active PMTs (by id number). An empt list
                         implies that all PMTs are active
-    :param n_baseline:  number of samples taken to compute baseline
     :param thr_trigger: threshold to start the BLR process
     
     :returns: an array with deconvoluted PMTs. If PMT is not active
@@ -111,7 +105,6 @@ cpdef deconv_pmt(np.ndarray[double, ndim=2] pmtrwf,
     cdef int pmt
     for pmt in PMT:
         signal_r = deconvolve_signal(signal_i[pmt],
-                                     n_baseline             = n_baseline,
                                      coeff_clean            = coeff_c[pmt],
                                      coeff_blr              = coeff_blr[pmt],
                                      thr_trigger            = thr_trigger,
