@@ -106,9 +106,8 @@ def cwf_from_rwf(pmtrwf, event_list, calib_vectors, deconv_params):
         pmt_evt   = pmtrwf[event]
         RWF_noped = csf.means(pmt_evt[:, :deconv_params.n_baseline]) - pmt_evt
         CWF.append(blr.deconv_pmt(RWF_noped, calib_vectors.coeff_c,
-                             calib_vectors.coeff_blr,
-                             n_baseline=deconv_params.n_baseline,
-                             thr_trigger=deconv_params.thr_trigger))
+                                  calib_vectors.coeff_blr,
+                                  thr_trigger=deconv_params.thr_trigger))
     return CWF
 
 

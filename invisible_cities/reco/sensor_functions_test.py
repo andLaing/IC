@@ -35,7 +35,6 @@ def test_cwf_blr(dbnew, electron_MCRD_file):
                              coeff_c,
                              coeff_blr,
                              pmt_active,
-                             n_baseline=28000,
                              thr_trigger=5)
 
         diff = wfm.compare_cwf_blr(cwf         = [CWF],
