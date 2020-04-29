@@ -103,11 +103,13 @@ def cwf_from_rwf(pmtrwf, event_list, calib_vectors, deconv_params):
 
     CWF=[]
     for event in event_list:
-        pmt_evt   = pmtrwf[event]
-        RWF_noped = csf.means(pmt_evt[:, :deconv_params.n_baseline]) - pmt_evt
-        CWF.append(blr.deconv_pmt(RWF_noped, calib_vectors.coeff_c,
-                                  calib_vectors.coeff_blr,
-                                  thr_trigger=deconv_params.thr_trigger))
+        pmt_evt = pmtrwf[event]
+        ZWF     = csf.means(pmt_evt[:, :deconv_params.n_baseline]) - pmt_evt
+        rep_thr = np.repeat(deconv_params.thr_trigger, ZWF.shape[0])
+        CWF.append(np.array(tuple(map(blr.deconvolve_signal, ZWF,
+                                      calib_vectors.coeff_c     ,
+                                      calib_vectors.coeff_blr   ,
+                                      rep_thr                   ))))
     return CWF
 
 

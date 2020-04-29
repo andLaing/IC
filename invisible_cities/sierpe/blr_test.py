@@ -103,7 +103,6 @@ def test_deconvolve_signal_ad_hoc_signals(ad_hoc_blr_signals):
 @mark.slow
 def test_deconv_pmt_ad_hoc_signals_all(ad_hoc_blr_signals):
     all_rwfs, all_true_blr_wfs, n_baseline, params = ad_hoc_blr_signals
-    pmt_active                         = [] # Means all
 
     # This test takes long, so we pick a random event.
     # Its exhaustiveness relies on repeated test runs.
@@ -111,14 +110,13 @@ def test_deconv_pmt_ad_hoc_signals_all(ad_hoc_blr_signals):
     evt_rwfs         = all_rwfs        [evt_no]
     evt_true_blr_wfs = all_true_blr_wfs[evt_no]
 
-    evt_cwfs   = csf.means(evt_rwfs[:, :n_baseline]) - evt_rwfs
+    evt_cwfs = csf.means(evt_rwfs[:, :n_baseline]) - evt_rwfs
 
-    blr_wfs    = blr.deconv_pmt(evt_cwfs,
-                                params.coeff_clean,
-                                params.coeff_blr  ,
-                                pmt_active        ,
-                                params.thr_trigger,
-                                params.accum_discharge_length)
+    rep_thr  = np.repeat(params.thr_trigger           , evt_cwfs.shape[0])
+    rep_acc  = np.repeat(params.accum_discharge_length, evt_cwfs.shape[0])
+    blr_wfs  = np.array(tuple(map(blr.deconvolve_signal, evt_cwfs        ,
+                                  params.coeff_clean   , params.coeff_blr,
+                                  rep_thr              , rep_acc         )))
 
     np.allclose(blr_wfs, evt_true_blr_wfs)
 
@@ -138,13 +136,11 @@ def test_deconv_pmt_ad_hoc_signals_dead_sensors(ad_hoc_blr_signals):
     evt_rwfs         = all_rwfs        [evt_no]
     evt_true_blr_wfs = all_true_blr_wfs[evt_no]
 
-    evt_cwfs   = csf.means(evt_rwfs[:, :n_baseline]) - evt_rwfs
-
-    blr_wfs = blr.deconv_pmt(evt_cwfs,
-                             params.coeff_clean,
-                             params.coeff_blr  ,
-                             pmt_active.tolist(),
-                             params.thr_trigger,
-                             params.accum_discharge_length)
+    evt_cwfs = csf.means(evt_rwfs[:, :n_baseline]) - evt_rwfs
+    rep_thr  = np.repeat(params.thr_trigger           , len(pmt_active))
+    rep_acc  = np.repeat(params.accum_discharge_length, len(pmt_active))
+    blr_wfs  = np.array(tuple(map(blr.deconvolve_signal, evt_cwfs[pmt_active],
+                                  params.coeff_clean   , params.coeff_blr    ,
+                                  rep_thr              , rep_acc             )))
 
     np.allclose(blr_wfs, evt_true_blr_wfs[pmt_active])
