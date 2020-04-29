@@ -33,10 +33,3 @@ cpdef deconvolve_signal(double [:] signal_daq,
                         double     coeff_blr       = *,
                         double     thr_trigger     = *,
                         int accum_discharge_length = *)
-
-cpdef deconv_pmt(np.ndarray[double, ndim=2] pmtrwf,
-                 double [:]                 coeff_c,
-                 double [:]                 coeff_blr,
-                 list                       pmt_active             = *,
-                 double                     thr_trigger            = *,
-                 int                        accum_discharge_length = *)
