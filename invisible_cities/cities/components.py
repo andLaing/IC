@@ -215,10 +215,8 @@ def deconv_pmt(dbfile, run_number, n_baseline,
 
     def deconv_pmt(RWF):
         CWF = pedestal_function(RWF[:, :n_baseline]) - RWF
-        return blr.deconv_pmt(CWF,
-                              coeff_c,
-                              coeff_blr,
-                              pmt_active = pmt_active)
+        return np.array(tuple(map(blr.deconvolve_signal, CWF[pmt_active],
+                                  coeff_c              , coeff_blr      )))
     return deconv_pmt
 
 
