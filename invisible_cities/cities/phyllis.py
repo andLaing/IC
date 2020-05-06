@@ -67,6 +67,7 @@ def phyllis(files_in, file_out, compression, event_range, print_mod, detector_db
             number_integrals, integral_start, integral_width, integrals_period,
             n_mau = 100):
     if   proc_mode == "gain"         : proc = pmt_deconvolver    (detector_db, run_number, n_baseline       )
+    elif proc_mode == "fgain"        : proc = pmt_deconvolver_fil(detector_db, run_number, n_baseline)
     elif proc_mode == "gain_mau"     : proc = pmt_deconvolver_mau(detector_db, run_number, n_baseline, n_mau)
     elif proc_mode == "gain_nodeconv": proc = mode_subtractor    (detector_db, run_number)
     else                             : raise ValueError(f"Unrecognized processing mode: {proc_mode}")
@@ -130,6 +131,12 @@ def phyllis(files_in, file_out, compression, event_range, print_mod, detector_db
 
 def pmt_deconvolver(detector_db, run_number, n_baseline):
     deconvolute = deconv_pmt(detector_db, run_number, n_baseline)
+    return deconvolute
+
+
+def pmt_deconvolver_fil(detector_db, run_number, n_baseline):
+    deconvolute = deconv_pmt(detector_db, run_number,
+                             n_baseline, pedestal_function=csf.fmeans)
     return deconvolute
 
 

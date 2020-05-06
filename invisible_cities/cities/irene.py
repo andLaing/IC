@@ -45,7 +45,8 @@ from .  components import compute_and_write_pmaps
 
 pedestal_funcs = {'mean'   : csf.means  ,
                   'median' : csf.medians,
-                  'mode'   : csf.modes  }
+                  'mode'   : csf.modes  ,
+                  'fmean'  : csf.fmeans }
 
 
 @city
