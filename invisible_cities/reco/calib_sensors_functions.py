@@ -58,9 +58,25 @@ median = zero_masked(np.ma.median)
 mean   = zero_masked(np.ma.mean)
 
 
+def noise_filtered(fn, nsig = 2):
+    """
+    mask and apply fn according to a n_sigma filter
+    """
+    @wraps(fn)
+    def proxy(wfs, *args, **kwds):
+        sigmas     = to_col_vector(np.std(wfs, ddof=1, axis=1))
+        mask       = np.abs(medians(wfs) - wfs) >= nsig * sigmas
+        masked_wfs = np.ma.masked_where(mask, wfs)
+        return fn(masked_wfs, *args, **kwds).filled(0)
+    return proxy
+
+fmean = noise_filtered(np.ma.mean)
+
+
 def means  (wfs): return to_col_vector(mean  (wfs, axis=1))
 def medians(wfs): return to_col_vector(median(wfs, axis=1))
 def modes  (wfs): return to_col_vector(mode  (wfs, axis=1))
+def fmeans (wfs): return to_col_vector(fmean (wfs, axis=1))
 
 
 def subtract_baseline(wfs, *, bls_mode=BlsMode.mean):
