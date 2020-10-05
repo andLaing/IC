@@ -33,3 +33,6 @@ cpdef deconvolve_signal(double [:] signal_daq,
                         double     coeff_blr       = *,
                         double     thr_trigger     = *,
                         int accum_discharge_length = *)
+
+
+cpdef deconvolve_signal_simp(double [:] signal_daq, double coeff_blr=*)

@@ -258,7 +258,7 @@ def signal_finder(buffer_len   : float,
 
 # TODO: consider caching database
 def deconv_pmt(dbfile, run_number, n_baseline,
-               selection=None, pedestal_function=csf.means):
+               selection=None, pedestal_function=csf.means, simple=None):
     DataPMT    = load_db.DataPMT(dbfile, run_number = run_number)
     pmt_active = np.nonzero(DataPMT.Active.values)[0].tolist() if selection is None else selection
     coeff_c    = DataPMT.coeff_c  .values.astype(np.double)
@@ -266,6 +266,9 @@ def deconv_pmt(dbfile, run_number, n_baseline,
 
     def deconv_pmt(RWF):
         CWF = pedestal_function(RWF[:, :n_baseline]) - RWF
+        if simple:
+            return np.array(tuple(map(blr.deconvolve_signal_simp,
+                                      CWF[pmt_active], coeff_blr)))
         return np.array(tuple(map(blr.deconvolve_signal, CWF[pmt_active],
                                   coeff_c              , coeff_blr      )))
     return deconv_pmt

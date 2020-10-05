@@ -71,3 +71,17 @@ cpdef deconvolve_signal(double [:] signal_daq,
                 j = 0
     # return recovered signal
     return np.asarray(signal_r)
+
+
+cpdef deconvolve_signal_simp(double [:] signal_daq,
+      			     double     coeff_blr=1.632411E-03):
+    cdef double     att     = np.exp(-coeff_blr)
+    cdef double [:] wf_corr = np.zeros_like(signal_daq)
+
+    bss = 0
+    for i in range(1,len(signal_daq)):
+
+        wf_corr[i] = signal_daq[i]-bss*att
+        bss        = bss*att - wf_corr[i]*coeff_blr
+
+    return np.asarray(wf_corr)

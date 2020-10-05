@@ -48,7 +48,7 @@ def irene(files_in, file_out, compression, event_range, print_mod, detector_db, 
           n_baseline, n_mau, thr_mau, thr_sipm, thr_sipm_type,
           s1_lmin, s1_lmax, s1_tmin, s1_tmax, s1_rebin_stride, s1_stride, thr_csum_s1,
           s2_lmin, s2_lmax, s2_tmin, s2_tmax, s2_rebin_stride, s2_stride, thr_csum_s2, thr_sipm_s2,
-          pmt_samp_wid=25*units.ns, sipm_samp_wid=1*units.mus):
+          pmt_samp_wid=25*units.ns, sipm_samp_wid=1*units.mus, simple_blr=None):
     if   thr_sipm_type.lower() == "common":
         # In this case, the threshold is a value in pes
         sipm_thr = thr_sipm
@@ -65,7 +65,7 @@ def irene(files_in, file_out, compression, event_range, print_mod, detector_db, 
     #### Define data transformations
 
     # Raw WaveForm to Corrected WaveForm
-    rwf_to_cwf       = fl.map(deconv_pmt(detector_db, run_number, n_baseline),
+    rwf_to_cwf       = fl.map(deconv_pmt(detector_db, run_number, n_baseline, simple=simple_blr),
                               args = "pmt",
                               out  = "cwf")
 
