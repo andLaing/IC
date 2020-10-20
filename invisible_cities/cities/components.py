@@ -236,9 +236,11 @@ def wf_binner(max_buffer: int) -> Callable:
     return bin_sensors
 
 
-def signal_finder(buffer_len   : float,
-                  bin_width    : float,
-                  bin_threshold:   int) -> Callable:
+def signal_finder(buffer_len    : float,
+                  bin_width     : float,
+                  integral_width: int  ,
+                  integral_min  : float,
+                  integral_max  : float) -> Callable:
     """
     Decides where there is signal-like
     charge according to the configuration
@@ -257,9 +259,11 @@ def signal_finder(buffer_len   : float,
     """
     # The stand_off is the minumum number of samples
     # necessary between candidate triggers.
-    stand_off = int(buffer_len / bin_width)
+    stand_off       = int(buffer_len / bin_width)
+    integral_limits = minmax(min=integral_min, max=integral_max)
     def find_signal(wfs: pd.Series) -> List[int]:
-        return bf.find_signal_start(wfs, bin_threshold, stand_off)
+        return bf.find_signal_start(wfs            , integral_width,
+                                    integral_limits,      stand_off)
     return find_signal
 
 

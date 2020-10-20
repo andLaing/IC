@@ -6,8 +6,9 @@ from typing import     List
 from typing import    Tuple
 from typing import    Union
 
-from .. reco.peak_functions import indices_and_wf_above_threshold
-from .. reco.peak_functions import                 split_in_peaks
+from .. reco .peak_functions import indices_and_wf_above_threshold
+from .. reco .peak_functions import                 split_in_peaks
+from .. types.ic_types       import                         minmax
 
 
 def weighted_histogram(data: pd.DataFrame, bins: np.ndarray) -> np.ndarray:
@@ -42,9 +43,17 @@ def bin_sensors(sensors   : pd.DataFrame,
 
 ## !! to-do: clarify for non-pmt versions of next
 ## !! to-do: Check on integral instead of only threshold?
-def find_signal_start(wfs          : Union[pd.Series, np.ndarray],
-                      bin_threshold: float                       ,
-                      stand_off    : int                         ) -> List[int]:
+def rolling_sum(wf: np.ndarray, width: int):
+    rsum = np.cumsum(wf)
+    rsum[width:] = rsum[width:] - rsum[:-width]
+    return rsum[width-1:]
+
+
+def find_signal_start(wfs            : Union[pd.Series, np.ndarray],
+                      integral_width : int                         ,
+                      integral_limits: minmax                      ,
+                      stand_off      : int
+                     ) -> List[int]:
     """
     Finds signal in the binned waveforms and
     identifies candidate triggers.
@@ -53,8 +62,11 @@ def find_signal_start(wfs          : Union[pd.Series, np.ndarray],
         eng_sum = wfs.sum(axis=0)
     else:
         eng_sum = wfs.sum()
-    indices = indices_and_wf_above_threshold(eng_sum,
-                                             bin_threshold).indices
+    integrals  = rolling_sum(eng_sum, integral_width)
+    first_indx = np.arange(0, eng_sum.shape[0] - integral_width + 1)
+    indices    = first_indx[list(map(integral_limits.contains, integrals))]
+    #indices = indices_and_wf_above_threshold(eng_sum,
+    #                                         bin_threshold).indices
     ## Just using this and the stand_off for now
     ## taking first above sum threshold.
     ## !! To-do: make more robust with min int? or similar
